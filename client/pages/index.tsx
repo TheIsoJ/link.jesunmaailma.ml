@@ -1,3 +1,5 @@
+"use client"
+
 import {
   createStyles,
   Container,
@@ -7,14 +9,16 @@ import {
   MantineProvider,
   keyframes,
   Tooltip,
+  Table,
 } from "@mantine/core"
 import { useViewportSize } from "@mantine/hooks"
 import { Link1Icon } from "@radix-ui/react-icons"
 import type { NextPage } from "next"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { ChangeEvent } from "react"
 import axios from "axios"
 import { Poppins } from "next/font/google"
+import { Ring } from "@uiball/loaders"
 
 const poppins = Poppins({
   weight: ["500", "400", "900"],
@@ -44,6 +48,9 @@ const useStyles = createStyles((theme) => ({
       paddingTop: 80,
     },
   },
+  table: {
+    borderRadius: ".5rem"
+  },
   title: {
     fontFamily: poppins.style.fontFamily,
     fontSize: 40,
@@ -58,6 +65,45 @@ const useStyles = createStyles((theme) => ({
       fontSize: 42,
       lineHeight: 1.2,
     },
+  },
+  subtitle: {
+    fontFamily: poppins.style.fontFamily,
+    fontSize: 16,
+    fontWeight: 400,
+    lineHeight: 1.1,
+    textAlign: "center",
+    marginTop: 16,
+    padding: 0,
+    color: theme.white,
+  },
+  subtitle2: {
+    fontFamily: poppins.style.fontFamily,
+    fontSize: 16,
+    fontWeight: 400,
+    lineHeight: 1.1,
+    textAlign: "center",
+    marginTop: 16,
+    padding: 0,
+    color: "hsl(0, 0%, 60%)",
+  },
+  listText: {
+    fontFamily: poppins.style.fontFamily,
+    fontSize: 16,
+    fontWeight: 400,
+    lineHeight: 1.1,
+    marginTop: 16,
+    marginBottom: 16,
+    padding: 0,
+    color: theme.white,
+  },
+  listText2: {
+    fontFamily: poppins.style.fontFamily,
+    fontSize: 24,
+    fontWeight: 400,
+    lineHeight: 1.1,
+    marginTop: 16,
+    padding: 0,
+    color: "hsl(0, 0%, 60%)",
   },
   controls: {
     marginTop: theme.spacing.xl * 2,
@@ -80,6 +126,11 @@ const Home: NextPage = () => {
 
   const [opened, setOpened] = useState(false)
 
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+
+  const [links, setLinks] = useState<ShortLinksProps>([])
+
   function handleChange(event: ChangeEvent<HTMLInputElement>): void {
     setText(event.target.value)
     setShowCopy(false)
@@ -92,12 +143,34 @@ const Home: NextPage = () => {
         { url: text }
       )
       setText(`${process.env.NEXT_PUBLIC_FRONTEND_URL}/${response.data.short}`)
+      getShortenedLinks()
     } catch (error) {
       console.error(error)
     }
 
     setShowCopy(true)
   }
+
+  async function getShortenedLinks() {
+    setError("")
+    setLoading(true)
+
+    try {
+      const response = await axios.get<ShortLinksProps>(
+        `${process.env.NEXT_PUBLIC_API_URL}/short-links`
+      )
+      setLinks(response.data)
+    } catch (e: any) {
+      setError(e.message)
+      console.error(e.message)
+    }
+
+    setLoading(false)
+  }
+
+  useEffect(() => {
+    getShortenedLinks()
+  }, [])
 
   function handleCopyToClipboard(): void {
     navigator.clipboard.writeText(text)
@@ -144,6 +217,14 @@ const Home: NextPage = () => {
               value={text}
               onChange={handleChange}
               onKeyDown={handleKeyDown}
+              styles={(theme) => ({
+                input: {
+                  borderRadius: "3rem"
+                },
+                wrapper: {
+                  color: "white"
+                }
+              })}
               style={{ marginRight: 8, flex: 1 }}
               placeholder="Osoite"
               size="md"
@@ -164,7 +245,7 @@ const Home: NextPage = () => {
                     border: 0,
                     paddingLeft: 20,
                     paddingRight: 20,
-
+                    borderRadius: "3rem",
                     "&:hover": {
                       backgroundColor: theme.fn.darken("#23bde7", 0.05),
                     },
@@ -177,6 +258,71 @@ const Home: NextPage = () => {
               </Button>
             </Tooltip>
           </div>
+          <Button
+            styles={(theme) => ({
+              root: {
+                backgroundColor: "#23bde7",
+                fontFamily: poppins.style.fontFamily,
+                fontSize: 16,
+                fontWeight: 500,
+                border: 0,
+                marginTop: 16,
+                marginBottom: 16,
+                paddingLeft: 20,
+                borderRadius: "3rem",
+                paddingRight: 20,
+                width: "100%",
+                "&:hover": {
+                  backgroundColor: theme.fn.darken("#23bde7", 0.05),
+                },
+              },
+            })}
+            size="md"
+            onClick={() => window.location.reload()}
+          >
+            Lataa sivu uudelleen
+          </Button>
+          <Table align="center" bg="dark" className={classes.table} mt={32}>
+            {loading ? (
+              <>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    marginTop: "16px",
+                  }}
+                >
+                  <Ring speed={2.4} size={48} color="white" />
+                  <p className={classes.subtitle2}>Ladataan...</p>
+                </div>
+              </>
+            ) : (
+              <>
+                <thead className={classes.subtitle}>
+                  <td>Pitkä osoite</td>
+                  <td>Lyhyt osoite</td>
+                  <td>Klikkauksia</td>
+                </thead>
+                {links.map((link) => (
+                  <tbody style={{ padding: 16 }} className={classes.subtitle2}>
+                    <tr>
+                      <td>{link.long}</td>
+                      <td>
+                        <a
+                          target="_blank"
+                          href={`${process.env.NEXT_PUBLIC_FRONTEND_URL}/${link.short}`}
+                        >
+                          {link.short}
+                        </a>
+                      </td>
+                      <td>{link.clicks}</td>
+                    </tr>
+                  </tbody>
+                ))}
+              </>
+            )}
+          </Table>
         </Container>
       </MantineProvider>
     </>
