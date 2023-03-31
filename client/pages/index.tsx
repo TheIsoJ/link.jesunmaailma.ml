@@ -206,7 +206,7 @@ const Home: NextPage = () => {
               gradient={{ from: "#18c082", to: "#1472d0", deg: 65.61 }}
               inherit
             >
-              Linkin Short
+              JM Link
             </Text>
           </h1>
           <div
