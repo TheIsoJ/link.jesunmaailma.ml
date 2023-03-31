@@ -1,7 +1,7 @@
 import express from 'express'
 const app = express()
-import * as dotenv from 'dotenv'
-dotenv.config()
+import { config } from 'dotenv'
+config()
 import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 import { generate } from 'shortid'
@@ -30,10 +30,10 @@ app.post('/v1/new', async (req, res) => {
   })
 
   if (!link) {
-    let short = generate();
+    let short = generate()
 
     while (await prisma.link.findFirst({ where: { short: short } })) {
-      short = generate();
+      short = generate()
     }
 
     await prisma.link.create({
@@ -42,11 +42,19 @@ app.post('/v1/new', async (req, res) => {
         short,
         createdAt: new Date().toUTCString(),
       },
-    });
-    res.send({ short: short });
+    })
+    res.send({ short: short })
   } else {
-    res.send({ short: link.short });
+    res.send({ short: link.short })
   }
+})
+
+app.get("/v1/short-links", async (_, res) => {
+  const links = await prisma.link.findMany({
+    select: { short: true, long: true, clicks: true },
+  })
+
+  res.json(links)
 })
 
 app.get('/v1/:short', async (req, res) => {
