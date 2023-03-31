@@ -52,6 +52,7 @@ app.post('/v1/new', async (req, res) => {
 app.get("/v1/short-links", async (_, res) => {
   const links = await prisma.link.findMany({
     select: { short: true, long: true, clicks: true },
+    orderBy: { clicks: "desc" }
   })
 
   res.json(links)
