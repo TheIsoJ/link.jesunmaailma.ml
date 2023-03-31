@@ -104,4 +104,23 @@ app.get('/v1/:short', async (req, res) => {
   }
 })
 
+app.delete("/v1/:short", async (req, res) => {
+  const short = req.params.short
+
+  if (!await prisma.link.findFirst({ where: { short } })) {
+    res.redirect(`${process.env.FRONTEND_URL}/404`)
+  } else {
+    try {
+      await prisma.link.delete({ where: { short } })
+      res.json({ deleted: true })
+    } catch (e) {
+      res.json({
+        error: {
+          message: "Ei onnistunut."
+        }
+      })
+    }
+  }
+})
+
 app.listen(process.env.PORT)
