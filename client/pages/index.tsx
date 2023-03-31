@@ -254,7 +254,7 @@ const Home: NextPage = () => {
                 size="md"
                 onClick={showCopy ? handleCopyToClipboard : handleClick}
               >
-                {showCopy ? "Kopioi" : "Lyhennä linkki"}
+                {showCopy ? "Kopioi" : "Lyhennä"}
               </Button>
             </Tooltip>
           </div>
@@ -278,9 +278,9 @@ const Home: NextPage = () => {
               },
             })}
             size="md"
-            onClick={() => window.location.reload()}
+            onClick={() => getShortenedLinks()}
           >
-            Lataa sivu uudelleen
+            Päivitä lista
           </Button>
           <Table align="center" bg="dark" className={classes.table} mt={32}>
             {loading ? (
