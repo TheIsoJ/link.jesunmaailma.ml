@@ -291,6 +291,7 @@ const Home: NextPage = () => {
                     flexDirection: "column",
                     alignItems: "center",
                     marginTop: "16px",
+                    marginBottom: "16px"
                   }}
                 >
                   <Ring speed={2.4} size={48} color="white" />
