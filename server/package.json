@@ -9,7 +9,7 @@
     "deleteDistFolder": "node utils/deleteDistFolder.js",
     "start:migrate:dev": "prisma migrate deploy && npm run start:dev",
     "start:migrate:dev:docker": "prisma migrate deploy && npm run start:dev:docker",
-    "start:migrate:prod": "prisma db push --accept-data-loss && prisma db seed && npm run start:prod",
+    "start:migrate:prod": "prisma db push --accept-data-loss && npm run start:prod",
     "start:dev:docker": "npm run build && node dist/server.js",
     "start:dev": "npm run build && nodemon dist/server.js",
     "start:prod": "npm run build && node dist/server.js",
